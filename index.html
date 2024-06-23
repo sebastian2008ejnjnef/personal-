@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página con Animaciones</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgUExURUdwTD3NoPf3+vT09Pa2tqbZ33vLztOmpfLy8ulHf+YAAACoSURBVCjPbdK9DoIwGAVgVHlWw0s++y+uSK8L///dAyJih8+YqslNFmSC1DbqjHLe8wdHeDci6SIltVvIn9JKbWeyRg5ySmTe4svWvQJTyZwdbn4gTx8ZTbf8MQE+3m+K5Ejrcy/O5VeyPb+NmAQDSogSm9MX2Erm+mksmc4FScALJk2eJs0aSaF00DDCOFDE7IAxOlcH15TtYPfbGk5wZK9hx2TEdO7gv5zRxtIBf5x/YebltOH5QAAAAAElFTkSuQmCC'), auto; /* Imagen base64 como cursor */
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93b, #6bffb3, #6b9dff);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #mouseCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="content">
+        <h1>Bienvenido a la Página con Animaciones</h1>
+        <p>Disfruta de las animaciones del ratón y el fondo.</p>
+    </div>
+    <canvas id="mouseCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('mouseCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+
+        class Particle {
+            constructor(x, y, size, color, weight) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.weight = weight;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                this.size -= 0.05;
+                if (this.size < 0) {
+                    this.size = 0;
+                }
+                this.y += this.weight;
+                this.weight += 0.2;
+
+                if (this.y > canvas.height - this.size) {
+                    this.weight *= -0.7;
+                }
+            }
+        }
+
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].size <= 0.3) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        canvas.addEventListener('mousemove', (event) => {
+            const x = event.x;
+            const y = event.y;
+            for (let i = 0; i < 5; i++) {
+                particlesArray.push(new Particle(x, y, Math.random() * 5 + 1, 'white', Math.random() * 2 - 1));
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
